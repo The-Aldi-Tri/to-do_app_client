@@ -11,16 +11,16 @@ import {
   Modal,
   Box,
   Typography,
+  TablePagination,
 } from "@mui/material";
+import myTodo from "./Todos";
 
 const TodoList = () => {
-  const [todos, setTodos] = useState([
-    { id: 1, task: "Task 1", description: "Description 1", finished: false },
-    { id: 2, task: "Task 2", description: "Description 2", finished: false },
-    { id: 3, task: "Task 3", description: "Description 3", finished: false },
-  ]);
+  const [todos, setTodos] = useState(myTodo);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 3;
 
   const handleMarkFinished = (id) => {
     setTodos(
@@ -46,32 +46,54 @@ const TodoList = () => {
     setModalOpen(false);
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
   return (
     <Container
       maxWidth="md"
       style={{
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
+        //border: "1px solid",
       }}
     >
       <TableContainer>
-        <Table style={{ borderCollapse: "collapse", textAlign: "left" }}>
+        <Table
+          style={{
+            border: "1px solid",
+            borderCollapse: "collapse",
+            maxWidth: "700px",
+            margin: "auto",
+          }}
+        >
           <TableHead>
             <TableRow>
               <TableCell
                 style={{
-                  border: "1px solid #ddd",
+                  border: "1px solid",
                   fontWeight: "bold",
-                  width: "60%",
+                  width: "10%",
+                }}
+              >
+                Id
+              </TableCell>
+              <TableCell
+                style={{
+                  border: "1px solid",
+                  fontWeight: "bold",
+                  width: "50%",
                 }}
               >
                 Task
               </TableCell>
               <TableCell
                 style={{
-                  border: "1px solid #ddd",
+                  border: "1px solid",
                   fontWeight: "bold",
                   width: "40%",
                 }}
@@ -81,51 +103,56 @@ const TodoList = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {todos.map((todo) => (
+            {(rowsPerPage > 0
+              ? todos.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : todos
+            ).map((todo) => (
               <TableRow
                 key={todo.id}
                 style={{
                   textDecoration: todo.finished ? "line-through" : "none",
                 }}
               >
-                <TableCell style={{ border: "1px solid #ddd" }}>
+                <TableCell style={{ border: "1px solid" }}>{todo.id}</TableCell>
+                <TableCell style={{ border: "1px solid" }}>
                   {todo.task}
                 </TableCell>
-                <TableCell
-                  style={{ border: "1px solid #ddd", textAlign: "center" }}
-                >
+                <TableCell style={{ border: "1px solid", textAlign: "center" }}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleDescriptionClick(todo)}
                     style={{
-                      margin: "4px",
+                      margin: "3px",
                       width: "30%",
                     }}
                   >
-                    View Description
+                    View
                   </Button>
                   <Button
                     variant="contained"
                     color={todo.finished ? "warning" : "success"}
                     onClick={() => handleMarkFinished(todo.id)}
                     style={{
-                      margin: "4px",
+                      margin: "3px",
                       width: "30%",
                     }}
                   >
-                    {todo.finished ? "Unmark Finished" : "Mark Finished"}
+                    {todo.finished ? "Undone" : "Done"}
                   </Button>
                   <Button
                     variant="contained"
                     color="error"
                     onClick={() => handleDelete(todo.id)}
                     style={{
-                      margin: "4px",
+                      margin: "3px",
                       width: "30%",
                     }}
                   >
-                    Delete Task
+                    Delete
                   </Button>
                 </TableCell>
               </TableRow>
@@ -133,12 +160,16 @@ const TodoList = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Modal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
+      <TablePagination
+        component="div"
+        count={todos.length}
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[]} // Disable row per page options
+        page={page}
+        onPageChange={handleChangePage}
+        style={{ border: "1px solid", borderTop: "none" }}
+      />
+      <Modal open={modalOpen} onClose={handleCloseModal}>
         <Box
           sx={{
             position: "absolute",
@@ -149,10 +180,10 @@ const TodoList = () => {
             border: "2px solid black",
             boxShadow: 24,
             p: 4,
-            maxWidth: 400,
+            maxWidth: 600,
           }}
         >
-          <Typography id="modal-description" sx={{ mt: 2 }}>
+          <Typography id="modal-description" sx={{ m: 2 }}>
             {selectedTodo ? selectedTodo.description : ""}
           </Typography>
         </Box>
