@@ -10,33 +10,15 @@ import TablePagination from "@mui/material/TablePagination";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
 
 import rows from "./DummyData"; // Import Dummy Data
 
 export default function BasicTable() {
+  // For Table
   const [data, setData] = useState(rows);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedRow, setSelectedRow] = useState({});
-  const [openModal, setOpenModal] = useState(false);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleOpenModal = (row) => {
-    setSelectedRow(row);
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
 
   const handleFinishButton = (id) => {
     setData(
@@ -51,6 +33,43 @@ export default function BasicTable() {
 
   const handleDeleteButton = (id) => {
     setData(data.filter((i) => i.id !== id));
+  };
+
+  // For Table Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // For Modal
+  const [selectedRow, setSelectedRow] = useState({});
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  // For Dialog
+
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   return (
@@ -96,7 +115,10 @@ export default function BasicTable() {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={() => handleOpenModal(row)}
+                      onClick={() => {
+                        setSelectedRow(row);
+                        handleOpenModal();
+                      }}
                       sx={{ maxWidth: "20px" }}
                     >
                       VIEW
@@ -134,7 +156,10 @@ export default function BasicTable() {
                       variant="contained"
                       color="error"
                       sx={{ margin: "0 1 1 0", width: "45%", maxWidth: "20px" }}
-                      onClick={() => handleDeleteButton(row.id)}
+                      onClick={() => {
+                        setSelectedRow(row);
+                        handleOpenDialog(row);
+                      }}
                     >
                       Delete
                     </Button>
@@ -206,6 +231,31 @@ export default function BasicTable() {
           </Button>
         </Paper>
       </Modal>
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>
+          {"Are you sure you want to delete this task?"}
+        </DialogTitle>
+        <DialogActions>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCloseDialog}
+          >
+            No
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleDeleteButton(selectedRow.id);
+              setOpenDialog(false);
+            }}
+            autoFocus
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }
