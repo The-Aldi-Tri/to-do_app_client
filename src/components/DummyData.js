@@ -1,6 +1,12 @@
 import { nanoid } from "nanoid";
 function convertWIB(date) {
-  return date.toLocaleString("en-GB", { timeZone: "Asia/Jakarta" });
+  const [tanggal, waktu] = date
+    .toLocaleString("en-GB", { timeZone: "Asia/Jakarta" })
+    .replace(",", "")
+    .split(" ");
+  const revTanggal = tanggal.split("/").reverse().join("/");
+
+  return `${revTanggal} ${waktu}`;
 }
 
 function createData(task, details, time, finished = false, id = nanoid(10)) {

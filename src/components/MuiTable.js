@@ -1,5 +1,19 @@
 import React, { useState } from "react";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import Modal from "@mui/material/Modal";
+import Typography from "@mui/material/Typography";
+import { Dialog, DialogTitle, DialogActions } from "@mui/material";
+import {
+  Delete,
+  CheckBox,
+  Info,
+  CheckBoxOutlineBlank,
+  Close,
+  Cancel,
+  DeleteForever,
+} from "@mui/icons-material";
 import {
   TableContainer,
   Table,
@@ -9,35 +23,29 @@ import {
   TableCell,
   TablePagination,
 } from "@mui/material";
-import Button from "@mui/material/Button";
-import Modal from "@mui/material/Modal";
-import Typography from "@mui/material/Typography";
-import { Dialog, DialogTitle, DialogActions } from "@mui/material";
-import Stack from "@mui/material/Stack";
-import { Delete, CheckBox, Info, Undo } from "@mui/icons-material";
 
 import rows from "./DummyData"; // Import Dummy Data
 
 export default function MuiTable() {
-  // For Table
+  // For Table Component
   const [data, setData] = useState(rows);
 
   const handleFinishButton = (id) => {
     setData(
-      data.map((i) => {
-        if (i.id === id) {
-          return { ...i, finished: !i.finished };
+      data.map((item) => {
+        if (item.id === id) {
+          return { ...item, finished: !item.finished };
         }
-        return i;
+        return item;
       })
     );
   };
 
   const handleDeleteButton = (id) => {
-    setData(data.filter((i) => i.id !== id));
+    setData(data.filter((item) => item.id !== id));
   };
 
-  // For Table Pagination
+  // For Table Pagination Component
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -53,7 +61,7 @@ export default function MuiTable() {
     setPage(0);
   };
 
-  // For Modal
+  // For Modal Component
   const [selectedRow, setSelectedRow] = useState({});
   const [openModal, setOpenModal] = useState(false);
 
@@ -65,8 +73,7 @@ export default function MuiTable() {
     setOpenModal(false);
   };
 
-  // For Dialog
-
+  // For Dialog Component
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleOpenDialog = () => {
@@ -78,25 +85,38 @@ export default function MuiTable() {
   };
 
   // Styling
-  const tableHeadSx = { color: "white", fontWeight: "bold", p: 0.5 };
-  const actionsButtonSx = { p: 0.5 };
+  const tableHeaderSx = {
+    backgroundColor: "darkblue",
+    position: "sticky",
+    top: 0,
+    zIndex: 3,
+  };
+  const tableHeaderCellSx = { color: "white", fontWeight: "bold", p: "3px" };
+  const actionsButtonSx = { p: "3px", margin: "3px" };
+
+  const modalSx = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    display: "flex",
+    flexDirection: "column",
+    p: 1,
+    minWidth: 300,
+    maxWidth: 600,
+    minHeight: 200,
+    maxHeight: 400,
+  };
 
   return (
     <Paper>
       <TableContainer>
         <Table aria-label="Task table">
-          <TableHead
-            sx={{
-              backgroundColor: "darkblue",
-              position: "sticky",
-              top: 0,
-              zIndex: 3,
-            }}
-          >
+          <TableHead sx={tableHeaderSx}>
             <TableRow>
-              <TableCell sx={tableHeadSx}>Created</TableCell>
-              <TableCell sx={tableHeadSx}>Task</TableCell>
-              <TableCell sx={tableHeadSx}>Actions</TableCell>
+              <TableCell sx={tableHeaderCellSx}>Created</TableCell>
+              <TableCell sx={tableHeaderCellSx}>Task</TableCell>
+              <TableCell sx={tableHeaderCellSx}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -117,7 +137,7 @@ export default function MuiTable() {
                 <TableCell
                   sx={{
                     textDecoration: row.finished ? "line-through" : "none",
-                    p: 0.5,
+                    p: "3px",
                     width: "20%",
                   }}
                 >
@@ -126,7 +146,7 @@ export default function MuiTable() {
                 <TableCell
                   sx={{
                     textDecoration: row.finished ? "line-through" : "none",
-                    p: 0.5,
+                    p: "3px",
                     width: "50%",
                   }}
                 >
@@ -136,11 +156,11 @@ export default function MuiTable() {
                 </TableCell>
                 <TableCell
                   sx={{
-                    p: 0.5,
+                    p: "3px",
                     width: "30%",
                   }}
                 >
-                  <Stack direction="column" spacing={1}>
+                  <Stack direction="column">
                     <Button
                       variant="contained"
                       color="primary"
@@ -168,7 +188,7 @@ export default function MuiTable() {
                         variant="contained"
                         color="warning"
                         sx={actionsButtonSx}
-                        startIcon={<Undo />}
+                        startIcon={<CheckBoxOutlineBlank />}
                         onClick={() => handleFinishButton(row.id)}
                       >
                         Undone
@@ -212,27 +232,13 @@ export default function MuiTable() {
         }}
       />
       <Modal open={openModal} onClose={handleCloseModal}>
-        <Paper
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            display: "flex",
-            flexDirection: "column",
-            p: 1,
-            minWidth: 300,
-            maxWidth: 600,
-            minHeight: 200,
-            maxHeight: 400,
-          }}
-        >
+        <Paper sx={modalSx}>
           <Typography
             sx={{
               display: "flex",
               alignItems: "center",
               textAlign: "justify",
-              p: 0.5,
+              p: "3px",
               borderBottom: "1px solid",
             }}
           >
@@ -242,16 +248,17 @@ export default function MuiTable() {
             sx={{
               display: "flex",
               textAlign: "justify",
-              p: 0.5,
+              p: "3px",
             }}
           >
             {selectedRow.details ? selectedRow.details : ""}
           </Typography>
           <Button
             variant="contained"
-            color="secondary"
+            color="primary"
             onClick={handleCloseModal}
-            sx={{ marginTop: "auto" }}
+            sx={{ marginTop: "auto", p: "3px" }}
+            startIcon={<Close />}
           >
             CLOSE
           </Button>
@@ -266,6 +273,7 @@ export default function MuiTable() {
             variant="contained"
             color="primary"
             onClick={handleCloseDialog}
+            startIcon={<Cancel />}
           >
             No
           </Button>
@@ -276,7 +284,7 @@ export default function MuiTable() {
               handleDeleteButton(selectedRow.id);
               setOpenDialog(false);
             }}
-            autoFocus
+            startIcon={<DeleteForever />}
           >
             Yes
           </Button>
