@@ -1,23 +1,8 @@
 import "./App.css";
-import BasicTable from "./components/Table";
-import TodoForm from "./components/TodoForm";
-import TodoList from "./components/TodoList";
+import MuiTable from "./components/MuiTable";
 
 const App = () => {
-  return (
-    // <div
-    //   style={{
-    //     display: "flex",
-    //     flexDirection: "column",
-    //     alignItems: "center",
-    //     justifyContent: "center",
-    //   }}
-    // >
-    //   <TodoForm />
-    //   <TodoList />
-    // </div>
-    <BasicTable />
-  );
+  return <MuiTable />;
 };
 
 export default App;

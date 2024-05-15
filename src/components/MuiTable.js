@@ -1,22 +1,24 @@
 import React, { useState } from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import TablePagination from "@mui/material/TablePagination";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TablePagination,
+} from "@mui/material";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogActions from "@mui/material/DialogActions";
+import { Dialog, DialogTitle, DialogActions } from "@mui/material";
+import Stack from "@mui/material/Stack";
+import { Delete, CheckBox, Info, Undo } from "@mui/icons-material";
 
 import rows from "./DummyData"; // Import Dummy Data
 
-export default function BasicTable() {
+export default function MuiTable() {
   // For Table
   const [data, setData] = useState(rows);
 
@@ -38,6 +40,9 @@ export default function BasicTable() {
   // For Table Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -72,72 +77,88 @@ export default function BasicTable() {
     setOpenDialog(false);
   };
 
+  // Styling
+  const tableHeadSx = { color: "white", fontWeight: "bold", p: 0.5 };
+  const actionsButtonSx = { p: 0.5 };
+
   return (
     <Paper>
       <TableContainer>
         <Table aria-label="Task table">
-          <TableHead sx={{ bgcolor: "darkblue" }}>
+          <TableHead
+            sx={{
+              backgroundColor: "darkblue",
+              position: "sticky",
+              top: 0,
+              zIndex: 3,
+            }}
+          >
             <TableRow>
-              <TableCell sx={{ color: "white", border: "1px solid black" }}>
-                Created Time
-              </TableCell>
-              <TableCell sx={{ color: "white", border: "1px solid black" }}>
-                Task
-              </TableCell>
-              <TableCell sx={{ color: "white", border: "1px solid black" }}>
-                Details
-              </TableCell>
-              <TableCell sx={{ color: "white", border: "1px solid black" }}>
-                Actions
-              </TableCell>
+              <TableCell sx={tableHeadSx}>Created</TableCell>
+              <TableCell sx={tableHeadSx}>Task</TableCell>
+              <TableCell sx={tableHeadSx}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {(rowsPerPage > 0
               ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : data
-            ).map((row) => (
+            ).map((row, index) => (
               <TableRow
                 key={row.id}
-                style={{
-                  textDecoration: row.finished ? "line-through" : "none",
-                  backgroundColor: row.finished ? "green" : "white",
+                sx={{
+                  backgroundColor: row.finished
+                    ? "green"
+                    : index % 2 === 0
+                    ? "lightgrey"
+                    : "white",
                 }}
               >
-                <TableCell>{row.time}</TableCell>
-                <TableCell>{row.task}</TableCell>
                 <TableCell
                   sx={{
-                    textAlign: "center",
+                    textDecoration: row.finished ? "line-through" : "none",
+                    p: 0.5,
+                    width: "20%",
                   }}
                 >
-                  {row.details ? (
+                  {row.time}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    textDecoration: row.finished ? "line-through" : "none",
+                    p: 0.5,
+                    width: "50%",
+                  }}
+                >
+                  {row.task.length < 30
+                    ? row.task
+                    : row.task.slice(0, 30) + "..."}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    p: 0.5,
+                    width: "30%",
+                  }}
+                >
+                  <Stack direction="column" spacing={1}>
                     <Button
                       variant="contained"
                       color="primary"
+                      sx={actionsButtonSx}
+                      startIcon={<Info />}
                       onClick={() => {
                         setSelectedRow(row);
                         handleOpenModal();
                       }}
-                      sx={{ maxWidth: "20px" }}
                     >
-                      VIEW
+                      Detail
                     </Button>
-                  ) : (
-                    "[ EMPTY ]"
-                  )}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    textAlign: "center",
-                  }}
-                >
-                  <div sx={{ display: "flex" }}>
                     {!row.finished ? (
                       <Button
                         variant="contained"
                         color="success"
-                        sx={{ margin: 1, width: "45%", maxWidth: "20px" }}
+                        sx={actionsButtonSx}
+                        startIcon={<CheckBox />}
                         onClick={() => handleFinishButton(row.id)}
                       >
                         Finish
@@ -146,16 +167,18 @@ export default function BasicTable() {
                       <Button
                         variant="contained"
                         color="warning"
-                        sx={{ margin: 1, width: "45%", maxWidth: "20px" }}
+                        sx={actionsButtonSx}
+                        startIcon={<Undo />}
                         onClick={() => handleFinishButton(row.id)}
                       >
-                        Unfinish
+                        Undone
                       </Button>
                     )}
                     <Button
                       variant="contained"
                       color="error"
-                      sx={{ margin: "0 1 1 0", width: "45%", maxWidth: "20px" }}
+                      sx={actionsButtonSx}
+                      startIcon={<Delete />}
                       onClick={() => {
                         setSelectedRow(row);
                         handleOpenDialog(row);
@@ -163,10 +186,15 @@ export default function BasicTable() {
                     >
                       Delete
                     </Button>
-                  </div>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
+            {emptyRows > 0 && (
+              <TableRow sx={{ height: 100 * emptyRows }}>
+                <TableCell colSpan={3} />
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -176,48 +204,45 @@ export default function BasicTable() {
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10]}
+        rowsPerPageOptions={[]} // Add number to activate rows per page options
         onRowsPerPageChange={handleChangeRowsPerPage}
-        sx={{ display: "flex", justifyContent: "center" }}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+        }}
       />
       <Modal open={openModal} onClose={handleCloseModal}>
         <Paper
           sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            flexDirection: "column",
             p: 1,
             minWidth: 300,
             maxWidth: 600,
             minHeight: 200,
             maxHeight: 400,
-            display: "flex",
-            flexDirection: "column",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
           }}
         >
           <Typography
             sx={{
-              borderBottom: "1px solid",
-              minHeight: 50,
-              maxHeight: 100,
               display: "flex",
               alignItems: "center",
-              p: 1,
               textAlign: "justify",
+              p: 0.5,
+              borderBottom: "1px solid",
             }}
           >
             {selectedRow.task ? selectedRow.task : ""}
           </Typography>
           <Typography
             sx={{
-              borderBottom: "1px solid",
-              marginBottom: "5px",
-              minHeight: 200,
-              maxHeight: 400,
               display: "flex",
-              p: 1,
               textAlign: "justify",
+              p: 0.5,
             }}
           >
             {selectedRow.details ? selectedRow.details : ""}
@@ -226,6 +251,7 @@ export default function BasicTable() {
             variant="contained"
             color="secondary"
             onClick={handleCloseModal}
+            sx={{ marginTop: "auto" }}
           >
             CLOSE
           </Button>
