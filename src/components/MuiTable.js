@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
@@ -24,11 +25,9 @@ import {
   TablePagination,
 } from "@mui/material";
 
-import rows from "./DummyData"; // Import Dummy Data
-
-export default function MuiTable() {
+export default function MuiTable({ sharedData, handleSharedData }) {
   // For Table Component
-  const [data, setData] = useState(rows);
+  const [data, setData] = [sharedData, handleSharedData];
 
   const handleFinishButton = (id) => {
     setData(
@@ -50,7 +49,7 @@ export default function MuiTable() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -109,187 +108,200 @@ export default function MuiTable() {
   };
 
   return (
-    <Paper>
-      <TableContainer>
-        <Table aria-label="Task table">
-          <TableHead sx={tableHeaderSx}>
-            <TableRow>
-              <TableCell sx={tableHeaderCellSx}>Created</TableCell>
-              <TableCell sx={tableHeaderCellSx}>Task</TableCell>
-              <TableCell sx={tableHeaderCellSx}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(rowsPerPage > 0
-              ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : data
-            ).map((row, index) => (
-              <TableRow
-                key={row.id}
-                sx={{
-                  backgroundColor: row.finished
-                    ? "green"
-                    : index % 2 === 0
-                    ? "lightgrey"
-                    : "white",
-                }}
-              >
-                <TableCell
-                  sx={{
-                    textDecoration: row.finished ? "line-through" : "none",
-                    p: "3px",
-                    width: "20%",
-                  }}
-                >
-                  {row.time}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    textDecoration: row.finished ? "line-through" : "none",
-                    p: "3px",
-                    width: "50%",
-                  }}
-                >
-                  {row.task.length < 30
-                    ? row.task
-                    : row.task.slice(0, 30) + "..."}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    p: "3px",
-                    width: "30%",
-                  }}
-                >
-                  <Stack direction="column">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={actionsButtonSx}
-                      startIcon={<Info />}
-                      onClick={() => {
-                        setSelectedRow(row);
-                        handleOpenModal();
-                      }}
-                    >
-                      Detail
-                    </Button>
-                    {!row.finished ? (
-                      <Button
-                        variant="contained"
-                        color="success"
-                        sx={actionsButtonSx}
-                        startIcon={<CheckBox />}
-                        onClick={() => handleFinishButton(row.id)}
-                      >
-                        Finish
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="warning"
-                        sx={actionsButtonSx}
-                        startIcon={<CheckBoxOutlineBlank />}
-                        onClick={() => handleFinishButton(row.id)}
-                      >
-                        Undone
-                      </Button>
-                    )}
-                    <Button
-                      variant="contained"
-                      color="error"
-                      sx={actionsButtonSx}
-                      startIcon={<Delete />}
-                      onClick={() => {
-                        setSelectedRow(row);
-                        handleOpenDialog(row);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-            ))}
-            {emptyRows > 0 && (
-              <TableRow sx={{ height: 100 * emptyRows }}>
-                <TableCell colSpan={3} />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        component="div"
-        count={data.length}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[]} // Add number to activate rows per page options
-        onRowsPerPageChange={handleChangeRowsPerPage}
+    <Container maxWidth="md">
+      <Paper
+        elevation={3}
         sx={{
+          width: "100%",
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
         }}
-      />
-      <Modal open={openModal} onClose={handleCloseModal}>
-        <Paper sx={modalSx}>
-          <Typography
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              textAlign: "justify",
-              p: "3px",
-              borderBottom: "1px solid",
-            }}
-          >
-            {selectedRow.task ? selectedRow.task : ""}
-          </Typography>
-          <Typography
-            sx={{
-              display: "flex",
-              textAlign: "justify",
-              p: "3px",
-            }}
-          >
-            {selectedRow.details ? selectedRow.details : ""}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCloseModal}
-            sx={{ marginTop: "auto", p: "3px" }}
-            startIcon={<Close />}
-          >
-            CLOSE
-          </Button>
-        </Paper>
-      </Modal>
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>
-          {"Are you sure you want to delete this task?"}
-        </DialogTitle>
-        <DialogActions>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCloseDialog}
-            startIcon={<Cancel />}
-          >
-            No
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteButton(selectedRow.id);
-              setOpenDialog(false);
-            }}
-            startIcon={<DeleteForever />}
-          >
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+      >
+        <TableContainer>
+          <Table aria-label="Task table">
+            <TableHead sx={tableHeaderSx}>
+              <TableRow>
+                <TableCell sx={tableHeaderCellSx}>Created</TableCell>
+                <TableCell sx={tableHeaderCellSx}>Task</TableCell>
+                <TableCell sx={tableHeaderCellSx}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0
+                ? data.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : data
+              ).map((row, index) => (
+                <TableRow
+                  key={row.id}
+                  sx={{
+                    backgroundColor: row.finished
+                      ? "green"
+                      : index % 2 === 0
+                      ? "lightgrey"
+                      : "white",
+                  }}
+                >
+                  <TableCell
+                    sx={{
+                      textDecoration: row.finished ? "line-through" : "none",
+                      p: "3px",
+                      width: "20%",
+                    }}
+                  >
+                    {row.dateTime}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      textDecoration: row.finished ? "line-through" : "none",
+                      p: "3px",
+                      width: "50%",
+                    }}
+                  >
+                    {row.task.length < 30
+                      ? row.task
+                      : row.task.slice(0, 30) + "..."}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      p: "3px",
+                      width: "30%",
+                    }}
+                  >
+                    <Stack direction="column">
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={actionsButtonSx}
+                        startIcon={<Info />}
+                        onClick={() => {
+                          setSelectedRow(row);
+                          handleOpenModal();
+                        }}
+                      >
+                        Detail
+                      </Button>
+                      {!row.finished ? (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          sx={actionsButtonSx}
+                          startIcon={<CheckBox />}
+                          onClick={() => handleFinishButton(row.id)}
+                        >
+                          Finish
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="warning"
+                          sx={actionsButtonSx}
+                          startIcon={<CheckBoxOutlineBlank />}
+                          onClick={() => handleFinishButton(row.id)}
+                        >
+                          Undone
+                        </Button>
+                      )}
+                      <Button
+                        variant="contained"
+                        color="error"
+                        sx={actionsButtonSx}
+                        startIcon={<Delete />}
+                        onClick={() => {
+                          setSelectedRow(row);
+                          handleOpenDialog(row);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {emptyRows > 0 && (
+                <TableRow sx={{ height: 100 * emptyRows }}>
+                  <TableCell colSpan={3} />
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          component="div"
+          count={data.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]} // Add number to activate rows per page options
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        />
+        <Modal open={openModal} onClose={handleCloseModal}>
+          <Paper sx={modalSx}>
+            <Typography
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                textAlign: "justify",
+                p: "3px",
+                borderBottom: "1px solid",
+              }}
+            >
+              {selectedRow.task ? selectedRow.task : ""}
+            </Typography>
+            <Typography
+              sx={{
+                display: "flex",
+                textAlign: "justify",
+                p: "3px",
+              }}
+            >
+              {selectedRow.details ? selectedRow.details : ""}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCloseModal}
+              sx={{ marginTop: "auto", p: "3px" }}
+              startIcon={<Close />}
+            >
+              CLOSE
+            </Button>
+          </Paper>
+        </Modal>
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>
+            {"Are you sure you want to delete this task?"}
+          </DialogTitle>
+          <DialogActions>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCloseDialog}
+              startIcon={<Cancel />}
+            >
+              No
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDeleteButton(selectedRow.id);
+                setOpenDialog(false);
+              }}
+              startIcon={<DeleteForever />}
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Paper>
+    </Container>
   );
 }
