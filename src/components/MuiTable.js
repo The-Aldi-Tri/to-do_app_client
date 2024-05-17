@@ -201,14 +201,14 @@ export default function MuiTable({ sharedData, handleSharedData }) {
           style={{ margin: "auto" }}
         />
         <DetailsModal
-          isModalOpen={isModalOpen}
-          selectedRow={selectedRow}
-          handleCloseModal={handleCloseModal}
+          isOpen={isModalOpen}
+          data={selectedRow}
+          handleClose={handleCloseModal}
         />
         <DelConfirmDialog
-          isDialogOpen={isDialogOpen}
-          selectedRow={selectedRow}
-          handleCloseDialog={handleCloseDialog}
+          isOpen={isDialogOpen}
+          data={selectedRow}
+          handleClose={handleCloseDialog}
           handleDeleteButton={handleDeleteButton}
         />
       </Paper>

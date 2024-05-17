@@ -15,10 +15,6 @@ export default function Signup({ handleSelect }) {
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event) => event.preventDefault();
-
   const handleSubmit = (event) => {
     event.preventDefault();
     // const data = new FormData(event.currentTarget);
@@ -41,7 +37,11 @@ export default function Signup({ handleSelect }) {
         <Typography component="h1" variant="h5">
           Sign Up
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          /*noValidate*/ sx={{ mt: 1 }}
+        >
           <TextField
             margin="normal"
             required
@@ -66,18 +66,12 @@ export default function Signup({ handleSelect }) {
           <PasswordTextField
             label={"Password"}
             value={password}
-            handlePassword={setPassword}
-            showPassword={showPassword}
-            handleClickShowPassword={handleClickShowPassword}
-            handleMouseDownPassword={handleMouseDownPassword}
+            handleValue={setPassword}
           />
           <PasswordTextField
             label={"Re-Type Password"}
-            password={rePassword}
-            handlePassword={setRePassword}
-            showPassword={showPassword}
-            handleClickShowPassword={handleClickShowPassword}
-            handleMouseDownPassword={handleMouseDownPassword}
+            value={rePassword}
+            handleValue={setRePassword}
           />
           {/* <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}

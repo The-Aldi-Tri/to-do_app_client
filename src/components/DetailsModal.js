@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { Close } from "@mui/icons-material";
 
-const DetailsModal = ({ isModalOpen, selectedRow, handleCloseModal }) => {
+const DetailsModal = ({ isOpen, data, handleClose }) => {
   const modalSx = {
     position: "absolute",
     top: "50%",
@@ -24,7 +24,7 @@ const DetailsModal = ({ isModalOpen, selectedRow, handleCloseModal }) => {
   };
 
   return (
-    <Modal open={isModalOpen} onClose={handleCloseModal}>
+    <Modal open={isOpen} onClose={handleClose}>
       <Paper sx={modalSx}>
         <Typography>Task: </Typography>
         <Typography
@@ -39,7 +39,7 @@ const DetailsModal = ({ isModalOpen, selectedRow, handleCloseModal }) => {
             padding: "3px",
           }}
         >
-          {selectedRow.task ? selectedRow.task : ""}
+          {data.task ? data.task : ""}
         </Typography>
         <Typography>Details: </Typography>
         <Typography
@@ -54,12 +54,12 @@ const DetailsModal = ({ isModalOpen, selectedRow, handleCloseModal }) => {
             whiteSpace: "break-spaces",
           }}
         >
-          {selectedRow.details ? selectedRow.details : ""}
+          {data.details ? data.details : ""}
         </Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleCloseModal}
+          onClick={handleClose}
           sx={{ marginTop: "auto", p: "3px" }}
           startIcon={<Close />}
         >

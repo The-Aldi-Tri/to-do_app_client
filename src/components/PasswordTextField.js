@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   FormControl,
   InputLabel,
@@ -7,20 +8,17 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-export default function PasswordTextField({
-  label,
-  value,
-  handlePassword,
-  showPassword,
-  handleClickShowPassword,
-  handleMouseDownPassword,
-}) {
+export default function PasswordTextField({ label, value, handleValue }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event) => event.preventDefault();
+
   return (
     <FormControl margin="normal" fullWidth required variant="outlined">
       <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
       <OutlinedInput
         value={value}
-        onChange={(e) => handlePassword(e.target.value)}
+        onChange={(e) => handleValue(e.target.value)}
         id="outlined-adornment-password"
         type={showPassword ? "text" : "password"}
         endAdornment={

@@ -15,10 +15,6 @@ export default function Login({ handleSelect }) {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event) => event.preventDefault();
-
   const handleSubmit = (event) => {
     event.preventDefault();
     // const data = new FormData(event.currentTarget);
@@ -41,7 +37,11 @@ export default function Login({ handleSelect }) {
         <Typography component="h1" variant="h5">
           Log in
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          /*noValidate*/ sx={{ mt: 1 }}
+        >
           <TextField
             margin="normal"
             required
@@ -54,10 +54,7 @@ export default function Login({ handleSelect }) {
           <PasswordTextField
             label={"Password"}
             value={password}
-            handlePassword={setPassword}
-            showPassword={showPassword}
-            handleClickShowPassword={handleClickShowPassword}
-            handleMouseDownPassword={handleMouseDownPassword}
+            handleValue={setPassword}
           />
           {/* <TextField
             margin="normal"

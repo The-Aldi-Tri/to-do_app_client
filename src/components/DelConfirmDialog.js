@@ -3,19 +3,19 @@ import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
 import { Cancel, DeleteForever } from "@mui/icons-material";
 
 const DelConfirmDialog = ({
-  isDialogOpen,
-  selectedRow,
-  handleCloseDialog,
+  isOpen,
+  data,
+  handleClose,
   handleDeleteButton,
 }) => {
   return (
-    <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+    <Dialog open={isOpen} onClose={handleClose}>
       <DialogTitle>{"Are you sure you want to delete this task?"}</DialogTitle>
       <DialogActions>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleCloseDialog}
+          onClick={handleClose}
           startIcon={<Cancel />}
         >
           No
@@ -24,8 +24,8 @@ const DelConfirmDialog = ({
           variant="contained"
           color="error"
           onClick={() => {
-            handleDeleteButton(selectedRow.id);
-            handleCloseDialog();
+            handleDeleteButton(data.id);
+            handleClose();
           }}
           startIcon={<DeleteForever />}
         >
