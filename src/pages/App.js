@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./App.css";
-import MuiTable from "./components/MuiTable";
-import MuiForm from "./components/MuiForm";
-import createData from "./utils/createData";
+import MuiTable from "../components/MuiTable";
+import MuiForm from "../components/MuiForm";
+import createData from "../utils/createData";
 
 const dummy = [
   createData(
