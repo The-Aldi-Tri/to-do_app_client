@@ -5,9 +5,11 @@ import {
   TextField,
   Typography,
   Paper,
+  Button,
+  Box,
 } from "@mui/material";
+import LinearProgress from "@mui/material/LinearProgress";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import LoadingButton from "@mui/lab/LoadingButton";
 import createData from "../utils/createData";
 
 const Form = ({ sharedData, handleSharedData }) => {
@@ -20,21 +22,30 @@ const Form = ({ sharedData, handleSharedData }) => {
     return data.trim() !== "" ? true : false;
   };
 
-  const handleSubmit = async (event) => {
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   try {
+  //     setIsLoading(true);
+
+  //     if (!validateRequired(task))
+  //       throw new Error("Task Field cannot be empty");
+
+  //     const newData = createData(task, details);
+  //     await handleSharedData([newData, ...sharedData]);
+  //   } catch (e) {
+  //     console.error(`Error: ${e.message}`);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  const handleSubmit = (event) => {
     event.preventDefault();
-    try {
-      setIsLoading(true);
-
-      if (!validateRequired(task))
-        throw new Error("Task Field cannot be empty");
-
+    setIsLoading(true);
+    setTimeout(() => {
       const newData = createData(task, details);
-      await handleSharedData([newData, ...sharedData]);
-    } catch (e) {
-      console.error(`Error: ${e.message}`);
-    } finally {
+      handleSharedData([newData, ...sharedData]);
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -86,15 +97,18 @@ const Form = ({ sharedData, handleSharedData }) => {
             sx={{ width: "75%", margin: "10px 0" }}
           />
         </FormControl>
-        <LoadingButton
-          variant="contained"
-          startIcon={<AddCircleOutlineIcon />}
-          type="submit"
-          loading={isLoading}
-          sx={{ width: "50%", margin: "10px 0 20px 0" }}
-        >
-          <span>Add New Task</span>
-        </LoadingButton>
+        <Box sx={{ width: "50%", margin: "10px 0 20px 0" }}>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleOutlineIcon />}
+            type="submit"
+            sx={{ width: "100%" }}
+            disabled={isLoading}
+          >
+            <span>Add New Task</span>
+          </Button>
+          {isLoading ? <LinearProgress /> : ""}
+        </Box>
       </Paper>
     </Container>
   );

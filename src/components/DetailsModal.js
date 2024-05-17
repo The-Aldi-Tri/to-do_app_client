@@ -15,30 +15,43 @@ const DetailsModal = ({ isModalOpen, selectedRow, handleCloseModal }) => {
     flexDirection: "column",
     p: 1,
     minWidth: 300,
-    maxWidth: 600,
     minHeight: 200,
-    maxHeight: 400,
+    "@media screen and (min-width: 768px)": {
+      minWidth: 600,
+      minHeight: 400,
+    },
+    border: "1px solid black",
   };
 
   return (
     <Modal open={isModalOpen} onClose={handleCloseModal}>
       <Paper sx={modalSx}>
+        <Typography>Task: </Typography>
         <Typography
           sx={{
-            display: "flex",
-            alignItems: "center",
-            textAlign: "justify",
-            p: "3px",
-            borderBottom: "1px solid",
+            alignContent: "center",
+            minHeight: 50,
+            "@media screen and (min-width: 768px)": {
+              minHeight: 100,
+            },
+            border: "1px solid",
+            marginBottom: "10px",
+            padding: "3px",
           }}
         >
           {selectedRow.task ? selectedRow.task : ""}
         </Typography>
+        <Typography>Details: </Typography>
         <Typography
           sx={{
-            display: "flex",
-            textAlign: "justify",
-            p: "3px",
+            minHeight: 100,
+            "@media screen and (min-width: 768px)": {
+              minHeight: 300,
+            },
+            padding: "3px",
+            border: "1px solid",
+            marginBottom: "10px",
+            whiteSpace: "break-spaces",
           }}
         >
           {selectedRow.details ? selectedRow.details : ""}
