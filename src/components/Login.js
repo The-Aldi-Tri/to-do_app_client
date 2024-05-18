@@ -9,20 +9,29 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import PasswordTextField from "./PasswordTextField";
+import { IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useFormik } from "formik";
+import { loginSchema } from "../utils/Schema";
 
-export default function Login({ handleSelect }) {
-  const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [password, setPassword] = useState("");
+const Login = ({ handleSelect }) => {
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // const data = new FormData(event.currentTarget);
-    // console.log({
-    //   email: data.get("email"),
-    //   password: data.get("password"),
-    // });
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
+
+  const formik = useFormik({
+    initialValues: {
+      emailOrUsername: "",
+      password: "",
+    },
+    validationSchema: loginSchema,
+    onSubmit: (values) => {
+      // Handle form submission here
+      console.log(values);
+    },
+  });
 
   return (
     <Container>
@@ -37,35 +46,57 @@ export default function Login({ handleSelect }) {
         <Typography component="h1" variant="h5">
           Log in
         </Typography>
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          /*noValidate*/ sx={{ mt: 1 }}
+        <form
+          onSubmit={formik.handleSubmit}
+          /*noValidate*/
         >
           <TextField
-            margin="normal"
-            required
-            fullWidth
-            value={emailOrUsername}
+            id="emailOrUsername"
             label="Email or Username"
-            autoComplete="email"
-            onChange={(e) => setEmailOrUsername(e.target.value)}
-          />
-          <PasswordTextField
-            label={"Password"}
-            value={password}
-            handleValue={setPassword}
-          />
-          {/* <TextField
-            margin="normal"
+            name="emailOrUsername"
+            autoComplete="username"
             required
             fullWidth
-            value={password}
+            value={formik.values.emailOrUsername}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.emailOrUsername &&
+              Boolean(formik.errors.emailOrUsername)
+            }
+            helperText={
+              formik.touched.emailOrUsername && formik.errors.emailOrUsername
+            }
+            margin="normal"
+          />
+          <TextField
+            id="password"
             label="Password"
-            type="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
-            onChange={(e) => setPassword(e.target.value)}
-          /> */}
+            required
+            fullWidth
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            margin="normal"
+          />
           {/* <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
@@ -76,7 +107,7 @@ export default function Login({ handleSelect }) {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+            Log In
           </Button>
           <Grid container>
             {/* <Grid item xs>
@@ -94,8 +125,9 @@ export default function Login({ handleSelect }) {
               </Link>
             </Grid>
           </Grid>
-        </Box>
+        </form>
       </Box>
     </Container>
   );
-}
+};
+export default Login;

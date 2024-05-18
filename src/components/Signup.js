@@ -1,28 +1,39 @@
-import * as React from "react";
-import { useState } from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import PasswordTextField from "./PasswordTextField";
+import { React, useState } from "react";
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Link,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useFormik } from "formik";
+import { signupSchema } from "../utils/Schema";
 
-export default function Signup({ handleSelect }) {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rePassword, setRePassword] = useState("");
+const Signup = ({ handleSelect }) => {
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // const data = new FormData(event.currentTarget);
-    // console.log({
-    //   email: data.get("email"),
-    //   password: data.get("password"),
-    // });
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
+
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      password: "",
+      rePassword: "",
+    },
+    validationSchema: signupSchema,
+    onSubmit: (values) => {
+      // Handle form submission here
+      console.log(values);
+    },
+  });
 
   return (
     <Container>
@@ -37,41 +48,92 @@ export default function Signup({ handleSelect }) {
         <Typography component="h1" variant="h5">
           Sign Up
         </Typography>
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          /*noValidate*/ sx={{ mt: 1 }}
-        >
+        <form onSubmit={formik.handleSubmit} /*noValidate*/>
           <TextField
-            margin="normal"
-            required
-            fullWidth
             id="username"
             label="Username"
             name="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <TextField
-            margin="normal"
+            autoComplete="username"
             required
             fullWidth
+            value={formik.values.username}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.username && Boolean(formik.errors.username)}
+            helperText={formik.touched.username && formik.errors.username}
+            margin="normal"
+          />
+          <TextField
             id="email"
             label="Email"
             name="email"
             autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            required
+            fullWidth
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+            margin="normal"
           />
-          <PasswordTextField
-            label={"Password"}
-            value={password}
-            handleValue={setPassword}
+          <TextField
+            id="password"
+            label="Password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            required
+            fullWidth
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            margin="normal"
           />
-          <PasswordTextField
-            label={"Re-Type Password"}
-            value={rePassword}
-            handleValue={setRePassword}
+          <TextField
+            id="rePassword"
+            label="Re-Type Password"
+            name="rePassword"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            required
+            fullWidth
+            value={formik.values.rePassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.rePassword && Boolean(formik.errors.rePassword)
+            }
+            helperText={formik.touched.rePassword && formik.errors.rePassword}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            margin="normal"
           />
           {/* <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
@@ -83,7 +145,7 @@ export default function Signup({ handleSelect }) {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+            Sign Up
           </Button>
           <Grid container>
             <Grid item>
@@ -92,12 +154,14 @@ export default function Signup({ handleSelect }) {
                 variant="body2"
                 onClick={() => handleSelect("login")}
               >
-                {"Already have an account? Log in"}
+                Already have an account? Log in
               </Link>
             </Grid>
           </Grid>
-        </Box>
+        </form>
       </Box>
     </Container>
   );
-}
+};
+
+export default Signup;
