@@ -24,7 +24,7 @@ const DelConfirmDialog = ({
           variant="contained"
           color="error"
           onClick={() => {
-            handleDeleteButton(data.id);
+            handleDeleteButton(data._id);
             handleClose();
           }}
           startIcon={<DeleteForever />}

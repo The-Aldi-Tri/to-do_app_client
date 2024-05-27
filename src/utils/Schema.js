@@ -86,4 +86,60 @@ export const loginSchema = yup.object({
       "Password must contain only alphanumeric characters"
     )
     .required("Password is required"),
+  rememberMe: yup.boolean(),
+});
+
+export const taskSchema = yup.object({
+  task: yup
+    .string()
+    .min(3, "Task must be at least 3 characters")
+    .max(100, "Task must not exceed 100 characters")
+    .required("Task is required"),
+  details: yup.string().max(350, "Task must not exceed 350 characters"),
+  finished: yup.boolean(),
+});
+
+export const editProfileSchema = yup.object({
+  username: yup
+    .string()
+    .matches(
+      /^[a-zA-Z0-9]+$/,
+      "Username must contain only alphanumeric characters"
+    )
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be at max 30 characters")
+    .required("Username is required"),
+  email: yup
+    .string()
+    .email("Invalid email address")
+    .required("Email is required"),
+});
+
+export const changePasswordSchema = yup.object({
+  currentPassword: yup
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(30, "Password must not exceed 30 characters")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(
+      /^[a-zA-Z0-9]+$/,
+      "Password must contain only alphanumeric characters"
+    )
+    .required("Password is required"),
+  newPassword: yup
+    .string()
+    .min(8, "New Password must be at least 8 characters")
+    .max(30, "New Password must not exceed 30 characters")
+    .matches(/[a-z]/, "New Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "New Password must contain at least one uppercase letter")
+    .matches(
+      /^[a-zA-Z0-9]+$/,
+      "New Password must contain only alphanumeric characters"
+    )
+    .notOneOf(
+      [yup.ref("currentPassword")],
+      "New password must be different from current password"
+    )
+    .required("New Password is required"),
 });

@@ -1,115 +1,145 @@
-import React, { useState } from "react";
+import { useFormik } from "formik";
+import queryString from "query-string";
+import { React } from "react";
 import {
+  Box,
+  Button,
+  Checkbox,
   Container,
-  FormControl,
+  FormControlLabel,
+  Paper,
   TextField,
   Typography,
-  Paper,
-  Button,
-  Box,
 } from "@mui/material";
-import LinearProgress from "@mui/material/LinearProgress";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import createData from "../utils/createData";
+import { taskSchema } from "../utils/Schema";
+import axiosCustom from "../utils/axiosCustom";
 
-const Form = ({ sharedData, handleSharedData }) => {
-  const [task, setTask] = useState("");
-  const [details, setDetails] = useState("");
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+const Form = ({ toggleTrigger }) => {
+  const formik = useFormik({
+    initialValues: {
+      task: "",
+      details: "",
+      finished: false,
+    },
+    validationSchema: taskSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        // Set submitting state to true to indicate form submission is in progress
+        setSubmitting(true);
 
-  const validateRequired = (data) => {
-    return data.trim() !== "" ? true : false;
-  };
+        // Convert data object to URL-encoded format
+        const formData = queryString.stringify(values);
 
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   try {
-  //     setIsLoading(true);
+        // Send form data to the backend using Axios
+        await axiosCustom.post(
+          "http://localhost:3001/api/task/create-task",
+          formData
+        );
 
-  //     if (!validateRequired(task))
-  //       throw new Error("Task Field cannot be empty");
+        // Log the response from the backend
+        // console.log(response.data);
 
-  //     const newData = createData(task, details);
-  //     await handleSharedData([newData, ...sharedData]);
-  //   } catch (e) {
-  //     console.error(`Error: ${e.message}`);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      const newData = createData(task, details);
-      handleSharedData([newData, ...sharedData]);
-      setIsLoading(false);
-    }, 1000);
-  };
+        toggleTrigger();
+      } catch (error) {
+        // Handle error
+        if (error.response) {
+          // The request was made and the server responded with a non-2xx status code
+          window.alert(error.response.data.message);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("No response received:", error.request);
+        } else {
+          // Something else happened while setting up the request
+          console.error("Error:", error.message);
+        }
+      } finally {
+        // Whether the submission was successful or not, always set submitting state back to false
+        setSubmitting(false);
+      }
+    },
+  });
 
   return (
-    <Container maxWidth="md" component="form" onSubmit={handleSubmit}>
-      <Paper
-        elevation={3}
+    <Container
+      maxWidth="sm"
+      component={Paper}
+      elevation={5}
+      sx={{ marginTop: "25px", maxHeight: "450px" }}
+    >
+      <Box
         sx={{
-          width: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          margin: "25px",
         }}
       >
         <Typography
-          variant="h4"
+          component="h1"
+          variant="h5"
           sx={{
             fontWeight: "bold",
-            margin: "20px 0 10px 0",
           }}
         >
           To-do List
         </Typography>
-        <FormControl fullWidth={true} sx={{ alignItems: "center" }}>
+        <form
+          onSubmit={formik.handleSubmit}
+          /*noValidate*/
+        >
           <TextField
+            id="task"
             label="Task"
+            name="task"
+            required
+            value={formik.values.task}
+            error={formik.touched.task && Boolean(formik.errors.task)}
+            helperText={formik.touched.task && formik.errors.task}
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
             variant="outlined"
-            required={true}
-            value={task}
-            error={isError}
-            helperText={isError ? "Can not be empty" : ""}
-            onBlur={() =>
-              validateRequired(task) ? setIsError(false) : setIsError(true)
-            }
-            onChange={(e) => {
-              validateRequired(e.target.value)
-                ? setIsError(false)
-                : setIsError(true);
-              setTask(e.target.value);
-            }}
-            sx={{ width: "75%", margin: "10px 0" }}
+            margin="normal"
+            fullWidth
           />
           <TextField
+            id="details"
             label="Details"
-            variant="outlined"
+            name="details"
             multiline
             rows={4}
-            value={details}
-            onChange={(e) => setDetails(e.target.value)}
-            sx={{ width: "75%", margin: "10px 0" }}
+            error={formik.touched.details && Boolean(formik.errors.details)}
+            helperText={formik.touched.details && formik.errors.details}
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            variant="outlined"
+            margin="normal"
+            fullWidth
           />
-        </FormControl>
-        <Box sx={{ width: "50%", margin: "10px 0 20px 0" }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formik.values.finished}
+                onChange={formik.handleChange}
+                color="primary"
+                id="finished"
+                name="finished"
+              />
+            }
+            label="Mark finished"
+            sx={{ marginTop: "8px", marginBottom: "8px" }}
+          />
           <Button
-            variant="contained"
             startIcon={<AddCircleOutlineIcon />}
             type="submit"
-            sx={{ width: "100%" }}
-            disabled={isLoading}
+            fullWidth
+            variant="contained"
+            sx={{ marginTop: "8px", marginBottom: "8px" }}
           >
-            <span>Add New Task</span>
+            Add New Task
           </Button>
-          {isLoading ? <LinearProgress /> : ""}
-        </Box>
-      </Paper>
+        </form>
+      </Box>
     </Container>
   );
 };

@@ -1,21 +1,29 @@
-import * as React from "react";
-import { useState } from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-// import FormControlLabel from "@mui/material/FormControlLabel";
-// import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import { IconButton, InputAdornment } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
+import queryString from "query-string";
+import { React, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Link,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { loginSchema } from "../utils/Schema";
+import { useAuth } from "../contexts/authContext";
+import axiosCustom from "../utils/axiosCustom";
 
 const Login = ({ handleSelect }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const { setLogin } = useAuth();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -25,11 +33,47 @@ const Login = ({ handleSelect }) => {
     initialValues: {
       emailOrUsername: "",
       password: "",
+      rememberMe: true,
     },
     validationSchema: loginSchema,
-    onSubmit: (values) => {
-      // Handle form submission here
-      console.log(values);
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        // Set submitting state to true to indicate form submission is in progress
+        setSubmitting(true);
+
+        // Convert data object to URL-encoded format
+        const formData = queryString.stringify(values);
+
+        // Send form data to the backend using Axios
+        await axiosCustom.post(
+          "http://localhost:3001/api/auth/login",
+          formData
+        );
+
+        // Log the response from the backend
+        // console.log(response.data);
+
+        // Set login state to true to indicate user is logged in
+        setLogin();
+
+        // Redirect user to the home page
+        navigate("/");
+      } catch (error) {
+        // Handle error
+        if (error.response) {
+          // The request was made and the server responded with a non-2xx status code
+          window.alert(error.response.data.message);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("No response received:", error.request);
+        } else {
+          // Something else happened while setting up the request
+          console.error("Error:", error.message);
+        }
+      } finally {
+        // Whether the submission was successful or not, always set submitting state back to false
+        setSubmitting(false);
+      }
     },
   });
 
@@ -97,10 +141,19 @@ const Login = ({ handleSelect }) => {
             }}
             margin="normal"
           />
-          {/* <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
+          <FormControlLabel
+            control={
+              <Checkbox
+                //value={formik.values.rememberMe}
+                checked={formik.values.rememberMe}
+                onChange={formik.handleChange}
+                color="primary"
+              />
+            }
+            id="rememberMe"
+            name="rememberMe"
             label="Remember me"
-          /> */}
+          />
           <Button
             type="submit"
             fullWidth

@@ -1,3 +1,5 @@
+import { useFormik } from "formik";
+import queryString from "query-string";
 import { React, useState } from "react";
 import {
   Container,
@@ -11,8 +13,8 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useFormik } from "formik";
 import { signupSchema } from "../utils/Schema";
+import axiosCustom from "../utils/axiosCustom";
 
 const Signup = ({ handleSelect }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,9 +31,41 @@ const Signup = ({ handleSelect }) => {
       rePassword: "",
     },
     validationSchema: signupSchema,
-    onSubmit: (values) => {
-      // Handle form submission here
-      console.log(values);
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        // Set submitting state to true to indicate form submission is in progress
+        setSubmitting(true);
+
+        // Convert data object to URL-encoded format
+        const formData = queryString.stringify(values);
+
+        // Send form data to the backend using Axios
+        await axiosCustom.post("http://localhost:3001/api/user/", formData);
+
+        // Log the response from the backend
+        // console.log(response.data);
+
+        // Redirect to login page
+        handleSelect("login");
+
+        // Notify user
+        window.alert("Successfully registered. Please login.");
+      } catch (error) {
+        // Handle error
+        if (error.response) {
+          // The request was made and the server responded with a non-2xx status code
+          window.alert(error.response.data.message);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("No response received:", error.request);
+        } else {
+          // Something else happened while setting up the request
+          console.error("Error:", error.message);
+        }
+      } finally {
+        // Whether the submission was successful or not, always set submitting state back to false
+        setSubmitting(false);
+      }
     },
   });
 
@@ -135,10 +169,6 @@ const Signup = ({ handleSelect }) => {
             }}
             margin="normal"
           />
-          {/* <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          /> */}
           <Button
             type="submit"
             fullWidth
