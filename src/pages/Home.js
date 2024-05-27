@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import MuiTable from "../components/MuiTable";
-import MuiForm from "../components/MuiForm";
+import TaskTable from "../components/TaskTable";
+import TaskForm from "../components/TaskForm";
 
 const Home = () => {
   const isSmallScreen = useMediaQuery("(max-width:600px)");
@@ -17,8 +17,8 @@ const Home = () => {
         gap: "25px",
       }}
     >
-      <MuiForm toggleTrigger={toggleTrigger} />
-      <MuiTable trigger={trigger} toggleTrigger={toggleTrigger} />
+      <TaskForm toggleTrigger={toggleTrigger} />
+      <TaskTable trigger={trigger} toggleTrigger={toggleTrigger} />
     </div>
   );
 };

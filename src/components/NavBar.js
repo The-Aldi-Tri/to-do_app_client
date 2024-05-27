@@ -5,7 +5,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuth } from "../contexts/authContext";
 import axiosCustom from "../utils/axiosCustom";
 
-export default function NavBar() {
+const NavBar = () => {
   const { isAuthenticated, setLogout } = useAuth();
   const navigate = useNavigate();
 
@@ -65,4 +65,6 @@ export default function NavBar() {
       </Toolbar>
     </AppBar>
   );
-}
+};
+
+export default NavBar;

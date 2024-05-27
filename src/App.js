@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import LoginSignup from "./pages/LoginSignUp";
 import ProfilePage from "./pages/Profile";
 
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -34,6 +34,6 @@ function App() {
       </AuthProvider>
     </BrowserRouter>
   );
-}
+};
 
 export default App;

@@ -21,7 +21,7 @@ import DetailsModal from "./DetailsModal";
 import DelConfirmDialog from "./DelConfirmDialog";
 import axiosCustom from "../utils/axiosCustom";
 
-export default function MuiTable({ trigger, toggleTrigger }) {
+const TaskTable = ({ trigger, toggleTrigger }) => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -257,4 +257,6 @@ export default function MuiTable({ trigger, toggleTrigger }) {
       />
     </TableContainer>
   );
-}
+};
+
+export default TaskTable;

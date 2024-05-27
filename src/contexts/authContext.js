@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
+    // Start interval to refresh token if authenticated
     if (isAuthenticated) {
       interval = setInterval(() => {
         refreshToken();

@@ -15,7 +15,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { taskSchema } from "../utils/Schema";
 import axiosCustom from "../utils/axiosCustom";
 
-const Form = ({ toggleTrigger }) => {
+const TaskForm = ({ toggleTrigger }) => {
   const formik = useFormik({
     initialValues: {
       task: "",
@@ -144,4 +144,4 @@ const Form = ({ toggleTrigger }) => {
   );
 };
 
-export default Form;
+export default TaskForm;
