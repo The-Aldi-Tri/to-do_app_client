@@ -4,8 +4,9 @@ import TaskTable from "../components/TaskTable";
 import TaskForm from "../components/TaskForm";
 
 const Home = () => {
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
   const [trigger, setTrigger] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width:1000px)");
+
   const toggleTrigger = () => setTrigger((prevTrigger) => !prevTrigger);
 
   return (
@@ -14,7 +15,7 @@ const Home = () => {
       style={{
         display: "flex",
         flexDirection: isSmallScreen ? "column" : "row",
-        gap: "25px",
+        gap: "20px",
       }}
     >
       <TaskForm toggleTrigger={toggleTrigger} />

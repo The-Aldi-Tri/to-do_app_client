@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
   Box,
-  TextField,
   Button,
-  Typography,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
   IconButton,
   InputAdornment,
   Paper,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { editProfileSchema, changePasswordSchema } from "../utils/Schema";
 import axiosCustom from "../utils/axiosCustom";
-import queryString from "query-string";
+import { editProfileSchema, changePasswordSchema } from "../utils/Schema";
 
 const ProfilePage = () => {
   const [initialValues, setInitialValues] = useState({
@@ -28,22 +27,16 @@ const ProfilePage = () => {
     email: "",
     createdAt: "",
   });
-
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axiosCustom.get(
-          "http://localhost:3001/api/user/"
-        );
+        const response = await axiosCustom.get("/users/");
         setInitialValues({
           username: response.data.data.username,
           email: response.data.data.email,
@@ -57,6 +50,7 @@ const ProfilePage = () => {
     fetchProfile();
   }, []);
 
+  // Formik for update profile
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
@@ -73,14 +67,9 @@ const ProfilePage = () => {
       }
 
       try {
-        // Convert data object to URL-encoded format
-        const formData = queryString.stringify({
-          username: values.username,
-          email: values.email,
-        });
-
+        delete values.createdAt;
         // Send form data to the backend using Axios
-        await axiosCustom.put("http://localhost:3001/api/user/", formData);
+        await axiosCustom.put("/users/", values);
 
         // Log the response from the backend
         // console.log(response.data);
@@ -105,25 +94,11 @@ const ProfilePage = () => {
     },
   });
 
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleOpenDeleteConfirmation = () => {
-    setOpenDeleteConfirmation(true);
-  };
-  const handleCloseDeleteConfirmation = () => {
-    setOpenDeleteConfirmation(false);
-  };
-
+  // Formik for change password
   const formik2 = useFormik({
     initialValues: {
-      currentPassword: "",
-      newPassword: "",
+      current_password: "",
+      new_password: "",
     },
     validationSchema: changePasswordSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -131,14 +106,8 @@ const ProfilePage = () => {
         // Set submitting state to true to indicate form submission is in progress
         setSubmitting(true);
 
-        // Convert data object to URL-encoded format
-        const formData = queryString.stringify(values);
-
         // Send form data to the backend using Axios
-        await axiosCustom.put(
-          "http://localhost:3001/api/auth/change-password",
-          formData
-        );
+        await axiosCustom.put("/auths/change-password", values);
 
         // Log the response from the backend
         // console.log(response.data);
@@ -162,9 +131,17 @@ const ProfilePage = () => {
     },
   });
 
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+
+  const handleOpenDialog = () => setOpenDialog(true);
+  const handleCloseDialog = () => setOpenDialog(false);
+
+  const handleOpenDeleteConfirmation = () => setOpenDeleteConfirmation(true);
+  const handleCloseDeleteConfirmation = () => setOpenDeleteConfirmation(false);
+
   const handleDeleteAccount = async () => {
     try {
-      await axiosCustom.delete("http://localhost:3001/api/user/");
+      await axiosCustom.delete("/users/");
 
       window.alert("Successfully deleted account");
       navigate("/login-signup");
@@ -295,21 +272,21 @@ const ProfilePage = () => {
           <DialogTitle>Change Password</DialogTitle>
           <DialogContent>
             <TextField
-              id="currentPassword"
-              name="currentPassword"
+              id="current_password"
+              name="current_password"
               label="Current Password"
               type={showPassword ? "text" : "password"}
               fullWidth
-              value={formik2.values.currentPassword}
+              value={formik2.values.current_password}
               onChange={formik2.handleChange}
               onBlur={formik2.handleBlur}
               error={
-                formik2.touched.currentPassword &&
-                Boolean(formik2.errors.currentPassword)
+                formik2.touched.current_password &&
+                Boolean(formik2.errors.current_password)
               }
               helperText={
-                formik2.touched.currentPassword &&
-                formik2.errors.currentPassword
+                formik2.touched.current_password &&
+                formik2.errors.current_password
               }
               InputProps={{
                 endAdornment: (
@@ -327,20 +304,20 @@ const ProfilePage = () => {
               margin="normal"
             />
             <TextField
-              id="newPassword"
-              name="newPassword"
+              id="new_password"
+              name="new_password"
               label="New Password"
               type={showPassword ? "text" : "password"}
               fullWidth
-              value={formik2.values.newPassword}
+              value={formik2.values.new_password}
               onChange={formik2.handleChange}
               onBlur={formik2.handleBlur}
               error={
-                formik2.touched.newPassword &&
-                Boolean(formik2.errors.newPassword)
+                formik2.touched.new_password &&
+                Boolean(formik2.errors.new_password)
               }
               helperText={
-                formik2.touched.newPassword && formik2.errors.newPassword
+                formik2.touched.new_password && formik2.errors.new_password
               }
               InputProps={{
                 endAdornment: (

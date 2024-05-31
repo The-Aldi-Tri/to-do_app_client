@@ -1,5 +1,4 @@
 import { useFormik } from "formik";
-import queryString from "query-string";
 import { React } from "react";
 import {
   Box,
@@ -28,14 +27,8 @@ const TaskForm = ({ toggleTrigger }) => {
         // Set submitting state to true to indicate form submission is in progress
         setSubmitting(true);
 
-        // Convert data object to URL-encoded format
-        const formData = queryString.stringify(values);
-
         // Send form data to the backend using Axios
-        await axiosCustom.post(
-          "http://localhost:3001/api/task/create-task",
-          formData
-        );
+        await axiosCustom.post("/tasks/", values);
 
         // Log the response from the backend
         // console.log(response.data);

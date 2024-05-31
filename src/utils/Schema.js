@@ -1,92 +1,96 @@
 import * as yup from "yup";
 
-export const signupSchema = yup.object({
-  username: yup
+// Username schema
+const usernameSchema = yup
+  .string()
+  .matches(
+    /^[a-zA-Z0-9]+$/,
+    "Username must contain only alphanumeric characters"
+  )
+  .min(3, "Username must be at least 3 characters")
+  .max(50, "Username must be at most 50 characters")
+  .required("Username is required");
+
+// Email schema
+const emailSchema = yup
+  .string()
+  .email("Invalid email address")
+  .required("Email is required");
+
+// Password schema
+const passwordSchema = yup
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password must not exceed 128 characters")
+  .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+  .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .matches(/[0-9]/, "Password must contain at least one number")
+  .matches(
+    /^[a-zA-Z0-9]+$/,
+    "Password must contain only alphanumeric characters"
+  )
+  .required("Password is required");
+
+// Register schema
+export const registerSchema = yup.object({
+  username: usernameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  confirm_password: yup
     .string()
-    .matches(
-      /^[a-zA-Z0-9]+$/,
-      "Username must contain only alphanumeric characters"
-    )
-    .min(3, "Username must be at least 3 characters")
-    .max(30, "Username must be at max 30 characters")
-    .required("Username is required"),
-  email: yup
-    .string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(30, "Password must not exceed 30 characters")
-    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .matches(
-      /^[a-zA-Z0-9]+$/,
-      "Password must contain only alphanumeric characters"
-    )
-    .required("Password is required"),
-  rePassword: yup
-    .string()
-    .oneOf([yup.ref("password"), null], "Passwords must match")
-    .required("Password confirmation is required"),
+    .oneOf([yup.ref("password"), null], "Confirm password must match password")
+    .required("Confirmation Password is required"),
 });
 
+// Login schema
 export const loginSchema = yup.object({
-  emailOrUsername: yup
+  email_or_username: yup
     .string()
-    .required("Email or username is required")
     .test(
       "is-email-or-username",
-      "Invalid email address or username",
+      "Must be a valid email or username",
       function (value) {
         const { path, createError } = this;
-        if (!value) return false;
-
-        // Check if it contains '@'
-        if (value.includes("@")) {
-          try {
-            // Attempt to validate as an email
-            yup.string().email().validateSync(value);
-            // If it's a valid email, return true
-            return true;
-          } catch (emailError) {
-            // If it's not a valid email, return an error
-            return createError({ path, message: "Invalid email address" });
-          }
-        } else {
-          // If it doesn't contain '@', validate as a username
-          const usernameSchema = yup
-            .string()
-            .min(3, "Username must be at least 3 characters")
-            .max(30, "Username must not exceed 30 characters")
-            .matches(
-              /^[a-zA-Z0-9]+$/,
-              "Username must contain only alphanumeric characters"
-            );
-          try {
-            // Attempt to validate as a username
-            usernameSchema.validateSync(value);
-            // If it's a valid username, return true
-            return true;
-          } catch (usernameError) {
-            // If it's not a valid username, return an error
-            return createError({ path, message: "Invalid username" });
-          }
+        const isEmail = emailSchema.isValidSync(value);
+        const isUsername = usernameSchema.isValidSync(value);
+        if (!isEmail && !isUsername) {
+          return createError({
+            path,
+            message: "Must be a valid email or username",
+          });
         }
+        return true;
       }
-    ),
-  password: yup
+    )
+    .required("Email or Username is required"),
+  password: passwordSchema,
+  remember_me: yup.boolean().required("Remember me is required"),
+});
+
+// Change password schema
+export const changePasswordSchema = yup.object({
+  current_password: passwordSchema,
+  new_password: yup
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(30, "Password must not exceed 30 characters")
-    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .min(8, "New password must be at least 8 characters")
+    .max(128, "New password must not exceed 128 characters")
+    .matches(/[a-z]/, "New password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "New password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "New password must contain at least one number")
     .matches(
       /^[a-zA-Z0-9]+$/,
-      "Password must contain only alphanumeric characters"
+      "New password must contain only alphanumeric characters"
     )
-    .required("Password is required"),
-  rememberMe: yup.boolean(),
+    .notOneOf(
+      [yup.ref("current_password")],
+      "New password must be different from current password"
+    )
+    .required("New Password is required"),
+});
+
+export const editProfileSchema = yup.object({
+  username: usernameSchema,
+  email: emailSchema,
 });
 
 export const taskSchema = yup.object({
@@ -96,50 +100,5 @@ export const taskSchema = yup.object({
     .max(100, "Task must not exceed 100 characters")
     .required("Task is required"),
   details: yup.string().max(350, "Task must not exceed 350 characters"),
-  finished: yup.boolean(),
-});
-
-export const editProfileSchema = yup.object({
-  username: yup
-    .string()
-    .matches(
-      /^[a-zA-Z0-9]+$/,
-      "Username must contain only alphanumeric characters"
-    )
-    .min(3, "Username must be at least 3 characters")
-    .max(30, "Username must be at max 30 characters")
-    .required("Username is required"),
-  email: yup
-    .string()
-    .email("Invalid email address")
-    .required("Email is required"),
-});
-
-export const changePasswordSchema = yup.object({
-  currentPassword: yup
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(30, "Password must not exceed 30 characters")
-    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .matches(
-      /^[a-zA-Z0-9]+$/,
-      "Password must contain only alphanumeric characters"
-    )
-    .required("Password is required"),
-  newPassword: yup
-    .string()
-    .min(8, "New Password must be at least 8 characters")
-    .max(30, "New Password must not exceed 30 characters")
-    .matches(/[a-z]/, "New Password must contain at least one lowercase letter")
-    .matches(/[A-Z]/, "New Password must contain at least one uppercase letter")
-    .matches(
-      /^[a-zA-Z0-9]+$/,
-      "New Password must contain only alphanumeric characters"
-    )
-    .notOneOf(
-      [yup.ref("currentPassword")],
-      "New password must be different from current password"
-    )
-    .required("New Password is required"),
+  finished: yup.boolean().required("Finished is required"),
 });

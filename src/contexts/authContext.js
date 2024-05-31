@@ -20,10 +20,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await axiosCustom.get("http://localhost:3001/api/auth/is-valid");
+        await axiosCustom.get("/auths/is-valid");
         setLogin();
       } catch (error) {
-        setLogout();
+        try {
+          await axiosCustom.get("/auths/refresh");
+          setLogin();
+        } catch (error) {
+          setLogout();
+        }
       } finally {
         setIsLoading(false);
       }
@@ -33,11 +38,11 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]); // Runs on mount and every time navigate value changed
 
   useEffect(() => {
-    let interval;
+    let refreshInterval;
 
     const refreshToken = async () => {
       try {
-        await axiosCustom.get("http://localhost:3001/api/auth/refresh");
+        await axiosCustom.get("/auths/refresh");
         setLogin();
       } catch (error) {
         setLogout();
@@ -46,13 +51,18 @@ export const AuthProvider = ({ children }) => {
 
     // Start interval to refresh token if authenticated
     if (isAuthenticated) {
-      interval = setInterval(() => {
+      console.log("Refresh interval started: ", new Date());
+      refreshInterval = setInterval(() => {
+        console.log("Refreshing :", new Date());
         refreshToken();
-      }, 15 * 60 * 1000); // 15 minutes
+      }, 14.5 * 60 * 1000); // 14.5 minutes(1/2 minute before token expire to ensure)
     }
 
     // Clear interval when isAuthenticated becomes false or component unmounts
-    return () => clearInterval(interval);
+    return () => {
+      console.log("Refresh interval cleared :", new Date());
+      clearInterval(refreshInterval);
+    };
   }, [isAuthenticated]); // Depends on isAuthenticated state
 
   return (

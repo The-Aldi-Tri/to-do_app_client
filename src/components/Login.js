@@ -1,5 +1,4 @@
 import { useFormik } from "formik";
-import queryString from "query-string";
 import { React, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -31,9 +30,9 @@ const Login = ({ handleSelect }) => {
 
   const formik = useFormik({
     initialValues: {
-      emailOrUsername: "",
+      email_or_username: "",
       password: "",
-      rememberMe: true,
+      remember_me: false,
     },
     validationSchema: loginSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -41,17 +40,11 @@ const Login = ({ handleSelect }) => {
         // Set submitting state to true to indicate form submission is in progress
         setSubmitting(true);
 
-        // Convert data object to URL-encoded format
-        const formData = queryString.stringify(values);
-
         // Send form data to the backend using Axios
-        await axiosCustom.post(
-          "http://localhost:3001/api/auth/login",
-          formData
-        );
+        const response = await axiosCustom.post("/auths/login", values);
 
         // Log the response from the backend
-        // console.log(response.data);
+        console.log(response.data);
 
         // Set login state to true to indicate user is logged in
         setLogin();
@@ -95,21 +88,22 @@ const Login = ({ handleSelect }) => {
           /*noValidate*/
         >
           <TextField
-            id="emailOrUsername"
+            id="email_or_username"
             label="Email or Username"
-            name="emailOrUsername"
+            name="email_or_username"
             autoComplete="username"
             required
             fullWidth
-            value={formik.values.emailOrUsername}
+            value={formik.values.email_or_username}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={
-              formik.touched.emailOrUsername &&
-              Boolean(formik.errors.emailOrUsername)
+              formik.touched.email_or_username &&
+              Boolean(formik.errors.email_or_username)
             }
             helperText={
-              formik.touched.emailOrUsername && formik.errors.emailOrUsername
+              formik.touched.email_or_username &&
+              formik.errors.email_or_username
             }
             margin="normal"
           />
@@ -144,14 +138,13 @@ const Login = ({ handleSelect }) => {
           <FormControlLabel
             control={
               <Checkbox
-                //value={formik.values.rememberMe}
-                checked={formik.values.rememberMe}
+                checked={formik.values.remember_me}
                 onChange={formik.handleChange}
                 color="primary"
               />
             }
-            id="rememberMe"
-            name="rememberMe"
+            id="remember_me"
+            name="remember_me"
             label="Remember me"
           />
           <Button

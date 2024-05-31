@@ -10,6 +10,8 @@ import {
   TableRow,
   TableCell,
   TablePagination,
+  Box,
+  Container,
 } from "@mui/material";
 import {
   CheckBox,
@@ -32,9 +34,7 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await axiosCustom.get(
-          `http://localhost:3001/api/task/get-tasks`
-        );
+        const response = await axiosCustom.get(`/tasks/`);
         return response.data.data;
       } catch (error) {
         // console.error("Error getting data:", error.response.data);
@@ -48,9 +48,7 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   // Handle finish task button click
   const handleFinishButton = async (id) => {
     try {
-      await axiosCustom.put(
-        `http://localhost:3001/api/task/toggle-finished/${id}`
-      );
+      await axiosCustom.put(`/tasks/toggle-finished/${id}`);
       toggleTrigger();
     } catch (error) {
       console.error("Error toggling finished:", error.response.data);
@@ -60,9 +58,7 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   // Handle delete task button click
   const handleDeleteButton = async (id) => {
     try {
-      await axiosCustom.delete(
-        `http://localhost:3001/api/task/delete-task/${id}`
-      );
+      await axiosCustom.delete(`/tasks/${id}`);
       toggleTrigger();
     } catch (error) {
       console.error("Error deleting task:", error.response.data);
@@ -83,17 +79,17 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   };
 
   // Render empty rows for pagination
-  const handleEmptyRows = () => {
-    const emptyRows =
-      page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
-    return (
-      emptyRows > 0 && (
-        <TableRow sx={{ height: 115 * emptyRows }}>
-          <TableCell colSpan={3} />
-        </TableRow>
-      )
-    );
-  };
+  // const handleEmptyRows = () => {
+  //   const emptyRows =
+  //     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+  //   return (
+  //     emptyRows > 0 && (
+  //       <TableRow sx={{ height: 115 * emptyRows }}>
+  //         <TableCell colSpan={3} />
+  //       </TableRow>
+  //     )
+  //   );
+  // };
 
   // Styling
   const actionsButtonSx = { margin: "3px 0" };
@@ -143,7 +139,10 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
             sx={{
               textDecoration: row.finished ? "line-through" : "none",
               width: "50%",
+              maxWidth: "100px",
               overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {row.task}
@@ -203,59 +202,66 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   };
 
   return (
-    <TableContainer
-      maxwidth="sm"
+    <Container
       component={Paper}
       elevation={5}
+      maxwidth="md"
+      disableGutters
       sx={{
-        marginTop: "25px",
         display: "flex",
         flexDirection: "column",
+        height: "600px",
+        marginTop: "25px",
+        overflow: "auto",
       }}
     >
-      <Table size="small">
-        <TableHead
-          sx={{
-            backgroundColor: "darkblue",
-            position: "sticky",
-            top: 0,
-            zIndex: 3,
-          }}
-        >
-          <TableRow>
-            {createTableHeader(["Created", "Task", "Actions"])}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {createTableBodyRows(data)}
-          {handleEmptyRows()}
-        </TableBody>
-      </Table>
-      <TablePagination
-        component="div"
-        sx={{ display: "flex", justifyContent: "center" }}
-        count={data.length}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[]} // Add number to activate
-        showFirstButton={true}
-        showLastButton={true}
-      />
+      <TableContainer>
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: "darkblue",
+              position: "sticky",
+              top: 0,
+              zIndex: 3,
+            }}
+          >
+            <TableRow>
+              {createTableHeader(["Created", "Task", "Actions"])}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {createTableBodyRows(data)}
+            {/* {handleEmptyRows()} */}
+          </TableBody>
+        </Table>
 
-      <DetailsModal
-        isOpen={isModalOpen}
-        data={selectedRow}
-        handleClose={handleCloseModal}
-      />
-      <DelConfirmDialog
-        isOpen={isDialogOpen}
-        data={selectedRow}
-        handleClose={handleCloseDialog}
-        handleDeleteButton={handleDeleteButton}
-      />
-    </TableContainer>
+        <DetailsModal
+          isOpen={isModalOpen}
+          data={selectedRow}
+          handleClose={handleCloseModal}
+        />
+        <DelConfirmDialog
+          isOpen={isDialogOpen}
+          data={selectedRow}
+          handleClose={handleCloseDialog}
+          handleDeleteButton={handleDeleteButton}
+        />
+      </TableContainer>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginTop: "auto" }}
+      >
+        <TablePagination
+          count={data.length}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]} // Add number to activate
+          showFirstButton={true}
+          showLastButton={true}
+        />
+      </Box>
+    </Container>
   );
 };
 

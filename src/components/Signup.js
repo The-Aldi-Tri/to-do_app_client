@@ -1,5 +1,4 @@
 import { useFormik } from "formik";
-import queryString from "query-string";
 import { React, useState } from "react";
 import {
   Container,
@@ -13,7 +12,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { signupSchema } from "../utils/Schema";
+import { registerSchema } from "../utils/Schema";
 import axiosCustom from "../utils/axiosCustom";
 
 const Signup = ({ handleSelect }) => {
@@ -30,17 +29,14 @@ const Signup = ({ handleSelect }) => {
       password: "",
       rePassword: "",
     },
-    validationSchema: signupSchema,
+    validationSchema: registerSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
         // Set submitting state to true to indicate form submission is in progress
         setSubmitting(true);
 
-        // Convert data object to URL-encoded format
-        const formData = queryString.stringify(values);
-
         // Send form data to the backend using Axios
-        await axiosCustom.post("http://localhost:3001/api/user/", formData);
+        await axiosCustom.post("/users/", values);
 
         // Log the response from the backend
         // console.log(response.data);

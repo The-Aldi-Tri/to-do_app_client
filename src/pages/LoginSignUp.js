@@ -5,9 +5,9 @@ import Signup from "../components/Signup";
 
 const LoginSignUp = () => {
   const [selected, setSelected] = useState("login");
-  const handleSelect = (newSelect) => {
-    setSelected(newSelect);
-  };
+
+  const handleSelect = (value) => setSelected(value);
+
   return (
     <div className="login-signup-container">
       <Box

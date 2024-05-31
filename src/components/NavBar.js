@@ -13,7 +13,7 @@ const NavBar = () => {
   const handleLogout = async () => {
     try {
       // Perform logout logic (e.g., clear authentication token)
-      await axiosCustom.delete("http://localhost:3001/api/auth/logout");
+      await axiosCustom.delete("/auths/logout");
       setLogout();
       navigate("/login-signup");
     } catch (error) {
@@ -48,7 +48,7 @@ const NavBar = () => {
               variant="contained"
               color="primary"
               startIcon={<AccountCircleIcon />}
-              href="/profile"
+              onClick={() => navigate("/profile")}
               sx={{ marginRight: "5px" }}
             >
               Profile
@@ -58,7 +58,11 @@ const NavBar = () => {
             </Button>
           </>
         ) : (
-          <Button href="/login-signup" color="primary" variant="contained">
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => navigate("/login-signup")}
+          >
             Login/Sign up
           </Button>
         )}
