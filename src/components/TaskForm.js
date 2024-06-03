@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { toast } from "react-toastify";
 import { taskSchema } from "../utils/Schema";
 import axiosCustom from "../utils/axiosCustom";
 
@@ -22,29 +23,25 @@ const TaskForm = ({ toggleTrigger }) => {
       finished: false,
     },
     validationSchema: taskSchema,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
+      setSubmitting(true);
       try {
-        // Set submitting state to true to indicate form submission is in progress
-        setSubmitting(true);
-
-        // Send form data to the backend using Axios
         await axiosCustom.post("/tasks/", values);
 
-        // Log the response from the backend
-        // console.log(response.data);
+        resetForm(); // Reset form values to initial state
+
+        toast.success("Task added successfully!");
 
         toggleTrigger();
       } catch (error) {
-        // Handle error
         if (error.response) {
-          // The request was made and the server responded with a non-2xx status code
-          window.alert(error.response.data.message);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error("No response received:", error.request);
+          // The request was made but the server responded with a non-2xx status code
+          toast.warning(error.response.data.message);
         } else {
-          // Something else happened while setting up the request
-          console.error("Error:", error.message);
+          toast.error("Something wrong. Please try again later");
+          /*error.request
+            ? console.error("No response received:", error.request) // The request was made but no response was received
+            : console.error("Error setting up the request:", error.message); // Something else happened while setting up the request*/
         }
       } finally {
         // Whether the submission was successful or not, always set submitting state back to false
@@ -127,9 +124,10 @@ const TaskForm = ({ toggleTrigger }) => {
             type="submit"
             fullWidth
             variant="contained"
+            disabled={formik.isSubmitting}
             sx={{ marginTop: "8px", marginBottom: "8px" }}
           >
-            Add New Task
+            {formik.isSubmitting ? "Adding..." : "Add New Task"}
           </Button>
         </form>
       </Box>

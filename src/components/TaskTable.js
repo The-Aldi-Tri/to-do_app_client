@@ -19,8 +19,9 @@ import {
   Delete,
   Info,
 } from "@mui/icons-material";
+import { toast } from "react-toastify";
 import DetailsModal from "./DetailsModal";
-import DelConfirmDialog from "./DelConfirmDialog";
+import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import axiosCustom from "../utils/axiosCustom";
 
 const TaskTable = ({ trigger, toggleTrigger }) => {
@@ -32,17 +33,24 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    const getData = async () => {
+    const fetchData = async () => {
       try {
         const response = await axiosCustom.get(`/tasks/`);
-        return response.data.data;
+        setData(response.data.data);
       } catch (error) {
-        // console.error("Error getting data:", error.response.data);
-        return [];
+        if (error.response) {
+          // The request was made but the server responded with a non-2xx status code
+          toast.warning(error.response.data.message);
+        } else {
+          toast.error("Something wrong. Please try again later");
+          /*error.request
+            ? console.error("No response received:", error.request) // The request was made but no response was received
+            : console.error("Error setting up the request:", error.message); // Something else happened while setting up the request*/
+        }
       }
     };
 
-    getData().then((data) => setData(data));
+    fetchData();
   }, [trigger]);
 
   // Handle finish task button click
@@ -51,7 +59,7 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
       await axiosCustom.put(`/tasks/toggle-finished/${id}`);
       toggleTrigger();
     } catch (error) {
-      console.error("Error toggling finished:", error.response.data);
+      // console.error("Error toggling finished:", error.response.data);
     }
   };
 
@@ -59,9 +67,11 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
   const handleDeleteButton = async (id) => {
     try {
       await axiosCustom.delete(`/tasks/${id}`);
+      handleCloseDialog();
       toggleTrigger();
+      toast.success("Task deleted successfully");
     } catch (error) {
-      console.error("Error deleting task:", error.response.data);
+      // console.error("Error deleting task:", error.response.data);
     }
   };
 
@@ -240,11 +250,15 @@ const TaskTable = ({ trigger, toggleTrigger }) => {
           data={selectedRow}
           handleClose={handleCloseModal}
         />
-        <DelConfirmDialog
-          isOpen={isDialogOpen}
-          data={selectedRow}
+        <DeleteConfirmationDialog
+          state={isDialogOpen}
           handleClose={handleCloseDialog}
-          handleDeleteButton={handleDeleteButton}
+          handleDelete={() => handleDeleteButton(selectedRow._id)}
+          dialogData={{
+            title: "Delete Task",
+            content:
+              "Are you sure you want to delete this task? This action cannot be undone.",
+          }}
         />
       </TableContainer>
       <Box

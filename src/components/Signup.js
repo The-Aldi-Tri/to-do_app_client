@@ -12,10 +12,15 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { toast } from "react-toastify";
 import { registerSchema } from "../utils/Schema";
 import axiosCustom from "../utils/axiosCustom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/authContext";
 
 const Signup = ({ handleSelect }) => {
+  const navigate = useNavigate();
+  const { setLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -27,36 +32,51 @@ const Signup = ({ handleSelect }) => {
       username: "",
       email: "",
       password: "",
-      rePassword: "",
+      confirm_password: "",
     },
     validationSchema: registerSchema,
     onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
       try {
-        // Set submitting state to true to indicate form submission is in progress
-        setSubmitting(true);
-
-        // Send form data to the backend using Axios
+        // Register (create user)
         await axiosCustom.post("/users/", values);
 
-        // Log the response from the backend
-        // console.log(response.data);
+        toast.success("Register Successful");
+        try {
+          // Login
+          await axiosCustom.post("/auths/login", {
+            email_or_username: values.username,
+            password: values.password,
+            remember_me: false,
+          });
 
-        // Redirect to login page
-        handleSelect("login");
+          toast.success("Login Successful");
 
-        // Notify user
-        window.alert("Successfully registered. Please login.");
-      } catch (error) {
-        // Handle error
-        if (error.response) {
-          // The request was made and the server responded with a non-2xx status code
-          window.alert(error.response.data.message);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error("No response received:", error.request);
+          // Set login state to true to indicate user is logged in
+          setLogin();
+
+          // Redirect user to the home page
+          navigate("/");
+        } catch (errorLogin) {
+          if (errorLogin.response) {
+            // The request was made but the server responded with a non-2xx status code
+            toast.warning(errorLogin.response.data.message);
+          } else {
+            toast.error("Something wrong. Please try again later");
+            /*error.request
+              ? console.error("No response received:", error.request) // The request was made but no response was received
+              : console.error("Error setting up the request:", error.message); // Something else happened while setting up the request*/
+          }
+        }
+      } catch (errorRegister) {
+        if (errorRegister.response) {
+          // The request was made but the server responded with a non-2xx status code
+          toast.warning(errorRegister.response.data.message);
         } else {
-          // Something else happened while setting up the request
-          console.error("Error:", error.message);
+          toast.error("Something wrong. Please try again later");
+          /*error.request
+            ? console.error("No response received:", error.request) // The request was made but no response was received
+            : console.error("Error setting up the request:", error.message); // Something else happened while setting up the request*/
         }
       } finally {
         // Whether the submission was successful or not, always set submitting state back to false
@@ -136,20 +156,23 @@ const Signup = ({ handleSelect }) => {
             margin="normal"
           />
           <TextField
-            id="rePassword"
-            label="Re-Type Password"
-            name="rePassword"
+            id="confirm_password"
+            label="Confirm Password"
+            name="confirm_password"
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             required
             fullWidth
-            value={formik.values.rePassword}
+            value={formik.values.confirm_password}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={
-              formik.touched.rePassword && Boolean(formik.errors.rePassword)
+              formik.touched.confirm_password &&
+              Boolean(formik.errors.confirm_password)
             }
-            helperText={formik.touched.rePassword && formik.errors.rePassword}
+            helperText={
+              formik.touched.confirm_password && formik.errors.confirm_password
+            }
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">

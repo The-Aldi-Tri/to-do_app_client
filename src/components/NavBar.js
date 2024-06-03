@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { toast } from "react-toastify";
 import { useAuth } from "../contexts/authContext";
 import axiosCustom from "../utils/axiosCustom";
 
@@ -14,19 +15,21 @@ const NavBar = () => {
     try {
       // Perform logout logic (e.g., clear authentication token)
       await axiosCustom.delete("/auths/logout");
+
+      toast.success("Logout Successful");
+
       setLogout();
+
       navigate("/login-signup");
     } catch (error) {
-      // Handle error
       if (error.response) {
-        // The request was made and the server responded with a non-2xx status code
-        window.alert(error.response.data.message);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("No response received:", error.request);
+        // The request was made but the server responded with a non-2xx status code
+        toast.warning(error.response.data.message);
       } else {
-        // Something else happened while setting up the request
-        console.error("Error:", error.message);
+        toast.error("Something wrong. Please try again later");
+        /*error.request
+          ? console.error("No response received:", error.request) // The request was made but no response was received
+          : console.error("Error setting up the request:", error.message); // Something else happened while setting up the request*/
       }
     }
   };

@@ -15,14 +15,15 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { toast } from "react-toastify";
 import { loginSchema } from "../utils/Schema";
 import { useAuth } from "../contexts/authContext";
 import axiosCustom from "../utils/axiosCustom";
 
 const Login = ({ handleSelect }) => {
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { setLogin } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -36,15 +37,11 @@ const Login = ({ handleSelect }) => {
     },
     validationSchema: loginSchema,
     onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
       try {
-        // Set submitting state to true to indicate form submission is in progress
-        setSubmitting(true);
+        await axiosCustom.post("/auths/login", values);
 
-        // Send form data to the backend using Axios
-        const response = await axiosCustom.post("/auths/login", values);
-
-        // Log the response from the backend
-        console.log(response.data);
+        toast.success("Login successful");
 
         // Set login state to true to indicate user is logged in
         setLogin();
@@ -52,16 +49,14 @@ const Login = ({ handleSelect }) => {
         // Redirect user to the home page
         navigate("/");
       } catch (error) {
-        // Handle error
         if (error.response) {
-          // The request was made and the server responded with a non-2xx status code
-          window.alert(error.response.data.message);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error("No response received:", error.request);
+          // The request was made but the server responded with a non-2xx status code
+          toast.warning(error.response.data.message);
         } else {
-          // Something else happened while setting up the request
-          console.error("Error:", error.message);
+          toast.error("Something wrong. Please try again later");
+          /*error.request
+            ? console.error("No response received:", error.request) // The request was made but no response was received
+            : console.error("Error setting up the request:", error.message); // Something else happened while setting up the request*/
         }
       } finally {
         // Whether the submission was successful or not, always set submitting state back to false

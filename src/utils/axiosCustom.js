@@ -4,7 +4,7 @@ import axiosRetry from "axios-retry";
 // Axios custom configuration
 const axiosConfig = {
   baseURL: "http://localhost:3001/api",
-  timeout: 5000, // 5 seconds
+  timeout: 3000, // 3 seconds
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,12 +18,25 @@ const axiosCustom = axios.create(axiosConfig);
 axiosRetry(axiosCustom, {
   retries: 2, // 2 retries + initial request = 3 requests
   retryDelay: axiosRetry.exponentialDelay, // Add delay (exponentially) between retries
-  retryCondition: (error) => {
-    // Retry on network errors or 5xx server errors
-    return (
-      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
-      error.response.status >= 500
-    );
+  retryCondition: async (error) => {
+    // Retry on 401 unauthorized with custom action
+    if (error.response && error.response.status === 401) {
+      try {
+        // Re-authenticate (Refresh token)
+        await axios.get("http://localhost:3001/api/auths/refresh", {
+          withCredentials: true,
+        });
+        return true; // Retry the original request
+      } catch (reAuthError) {
+        return false; // Do not retry the original request if re-authentication fails
+      }
+    }
+
+    // Retry on 5xx server errors
+    if (error.response && error.response.status >= 500) return true;
+
+    // Retry on network errors and idempotent requests
+    return axiosRetry.isNetworkOrIdempotentRequestError(error);
   },
 });
 
