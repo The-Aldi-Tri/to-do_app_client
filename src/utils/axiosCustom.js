@@ -23,7 +23,7 @@ axiosRetry(axiosCustom, {
     if (error.response && error.response.status === 401) {
       try {
         // Re-authenticate (Refresh token)
-        await axios.get("http://localhost:3001/api/auths/refresh", {
+        await axios.get(process.env.REACT_APP_API_URL + "/auths/refresh", {
           withCredentials: true,
         });
         return true; // Retry the original request

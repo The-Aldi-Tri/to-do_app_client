@@ -28,7 +28,10 @@ const TaskForm = ({ toggleTrigger }) => {
       try {
         await axiosCustom.post("/tasks/", values);
 
-        resetForm(); // Reset form values to initial state
+        resetForm({
+          ...formik.initialValues,
+          details: "",
+        }); // Reset form values to initial state
 
         toast.success("Task added successfully!");
 
@@ -98,6 +101,7 @@ const TaskForm = ({ toggleTrigger }) => {
             name="details"
             multiline
             rows={4}
+            value={formik.values.details}
             error={formik.touched.details && Boolean(formik.errors.details)}
             helperText={formik.touched.details && formik.errors.details}
             onBlur={formik.handleBlur}
