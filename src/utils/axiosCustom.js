@@ -3,7 +3,7 @@ import axiosRetry from "axios-retry";
 
 // Axios custom configuration
 const axiosConfig = {
-  baseURL: "http://localhost:3001/api",
+  baseURL: process.env.REACT_APP_API_URL,
   timeout: 3000, // 3 seconds
   headers: {
     "Content-Type": "application/json",
