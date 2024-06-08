@@ -8,6 +8,7 @@ import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import LoginSignup from "./pages/LoginSignUp";
 import ProfilePage from "./pages/Profile";
+import NotFoundPage from "./pages/NotFound";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
       <ToastContainer

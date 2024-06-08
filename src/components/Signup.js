@@ -85,6 +85,25 @@ const Signup = ({ handleSelect }) => {
     },
   });
 
+  const checkAvailable = async (fieldName, value) => {
+    if (!formik.errors[fieldName]) {
+      try {
+        await axiosCustom.post("/users/check-available", {
+          value: value,
+        });
+
+        formik.setFieldError(fieldName, undefined);
+      } catch (error) {
+        if (error.response.status === 409) {
+          formik.setFieldError(
+            fieldName,
+            error.response.data.message.replace("Email or Username", fieldName)
+          );
+        }
+      }
+    }
+  };
+
   return (
     <Container>
       <Box
@@ -108,7 +127,10 @@ const Signup = ({ handleSelect }) => {
             fullWidth
             value={formik.values.username}
             onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            onBlur={(e) => {
+              formik.handleBlur(e);
+              checkAvailable("username", e.currentTarget.value);
+            }}
             error={formik.touched.username && Boolean(formik.errors.username)}
             helperText={formik.touched.username && formik.errors.username}
             margin="normal"
@@ -122,11 +144,44 @@ const Signup = ({ handleSelect }) => {
             fullWidth
             value={formik.values.email}
             onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            onBlur={(e) => {
+              formik.handleBlur(e);
+              checkAvailable("email", e.currentTarget.value);
+            }}
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
             margin="normal"
           />
+          <Grid container spacing={1}>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={Boolean(formik.errors.email)}
+              >
+                Send
+              </Button>
+            </Grid>
+            <Grid item xs={10}>
+              <TextField
+                id="verification-code"
+                name="verification-code"
+                label="Verification code"
+                required
+                fullWidth
+                disabled={Boolean(formik.errors.email)}
+                // value={formik.values.username}
+                // onChange={formik.handleChange}
+                // onBlur={formik.handleBlur}
+                // error={
+                //   formik.touched.username && Boolean(formik.errors.username)
+                // }
+                // helperText={formik.touched.username && formik.errors.username}
+                margin="normal"
+              />
+            </Grid>
+          </Grid>
           <TextField
             id="password"
             label="Password"
@@ -207,6 +262,7 @@ const Signup = ({ handleSelect }) => {
               </Link>
             </Grid>
           </Grid>
+          {console.log(formik.errors.username)}
         </form>
       </Box>
     </Container>
