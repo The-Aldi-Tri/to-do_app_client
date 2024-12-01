@@ -35,6 +35,10 @@ const passwordSchema = yup
 export const registerSchema = yup.object({
   username: usernameSchema,
   email: emailSchema,
+  verification_code: yup
+    .string()
+    .matches(/^\d{6}$/, "Verification code must be exactly 6 digit numbers")
+    .required("Verification code is required"),
   password: passwordSchema,
   confirm_password: yup
     .string()

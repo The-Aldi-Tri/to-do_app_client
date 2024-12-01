@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Container,
   Box,
@@ -22,6 +22,27 @@ const Signup = ({ handleSelect }) => {
   const navigate = useNavigate();
   const { setLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [errorDuplicate, setErrorDuplicate] = useState({
+    username: "Initial error",
+    email: "Please add TLD (.com, .co.id, etc)",
+  });
+  const [countdown, setCountdown] = useState(() => {
+    // Check if countdown value exists in localStorage
+    const savedCountdown = localStorage.getItem("countdown");
+    return savedCountdown ? parseInt(savedCountdown) : 0; // Default to 0 if not found
+  });
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timerId = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timerId); // Clean up the timer on component unmount or countdown change
+    }
+  }, [countdown]);
+
+  useEffect(() => {
+    // Save countdown value to localStorage whenever it changes
+    localStorage.setItem("countdown", countdown.toString());
+  }, [countdown]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -31,6 +52,7 @@ const Signup = ({ handleSelect }) => {
     initialValues: {
       username: "",
       email: "",
+      verification_code: "",
       password: "",
       confirm_password: "",
     },
@@ -92,16 +114,44 @@ const Signup = ({ handleSelect }) => {
           value: value,
         });
 
-        formik.setFieldError(fieldName, undefined);
+        // formik.setFieldError(fieldName, undefined);
+        setErrorDuplicate((prevState) => ({
+          ...prevState,
+          [fieldName]: "",
+        }));
       } catch (error) {
         if (error.response.status === 409) {
-          formik.setFieldError(
-            fieldName,
-            error.response.data.message.replace("Email or Username", fieldName)
-          );
+          // formik.setFieldError(
+          //   fieldName,
+          //   error.response.data.message.replace("Email or Username", fieldName)
+          // );
+          setErrorDuplicate((prevState) => ({
+            ...prevState,
+            [fieldName]: error.response.data.message.replace(
+              "Email or Username",
+              fieldName
+            ),
+          }));
         }
       }
     }
+  };
+
+  const sendVerificationCode = async () => {
+    const sendVerificationCodeOperation = async () => {
+      try {
+        await axiosCustom.post("/users/send-verification-code", {
+          email: formik.values.email,
+        });
+      } catch (error) {
+        setCountdown(0);
+      }
+    };
+    toast.promise(sendVerificationCodeOperation(), {
+      pending: `Sending verification code to ${formik.values.email}`,
+      success: `Verification code sent to ${formik.values.email}`,
+      error: `Error sending verification code to ${formik.values.email}`,
+    });
   };
 
   return (
@@ -131,8 +181,15 @@ const Signup = ({ handleSelect }) => {
               formik.handleBlur(e);
               checkAvailable("username", e.currentTarget.value);
             }}
-            error={formik.touched.username && Boolean(formik.errors.username)}
-            helperText={formik.touched.username && formik.errors.username}
+            error={
+              formik.touched.username &&
+              (Boolean(formik.errors.username) ||
+                Boolean(errorDuplicate.username))
+            }
+            helperText={
+              formik.touched.username &&
+              (formik.errors.username || errorDuplicate.username)
+            }
             margin="normal"
           />
           <TextField
@@ -148,8 +205,14 @@ const Signup = ({ handleSelect }) => {
               formik.handleBlur(e);
               checkAvailable("email", e.currentTarget.value);
             }}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
+            error={
+              formik.touched.email &&
+              (Boolean(formik.errors.email) || Boolean(errorDuplicate.email))
+            }
+            helperText={
+              formik.touched.email &&
+              (formik.errors.email || errorDuplicate.email)
+            }
             margin="normal"
           />
           <Grid container spacing={1}>
@@ -158,26 +221,43 @@ const Signup = ({ handleSelect }) => {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
-                disabled={Boolean(formik.errors.email)}
+                disabled={
+                  !formik.touched.email ||
+                  Boolean(formik.errors.email) ||
+                  errorDuplicate.email ||
+                  countdown > 0
+                }
+                onClick={() => {
+                  sendVerificationCode();
+                  setCountdown(60);
+                }}
               >
-                Send
+                {countdown > 0 ? `${countdown} s` : "Send"}
               </Button>
             </Grid>
             <Grid item xs={10}>
               <TextField
-                id="verification-code"
-                name="verification-code"
+                id="verification_code"
+                name="verification_code"
                 label="Verification code"
                 required
                 fullWidth
-                disabled={Boolean(formik.errors.email)}
-                // value={formik.values.username}
-                // onChange={formik.handleChange}
-                // onBlur={formik.handleBlur}
-                // error={
-                //   formik.touched.username && Boolean(formik.errors.username)
-                // }
-                // helperText={formik.touched.username && formik.errors.username}
+                disabled={
+                  !formik.touched.email ||
+                  Boolean(formik.errors.email) ||
+                  errorDuplicate.email
+                }
+                value={formik.values.verification_code}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.verification_code &&
+                  Boolean(formik.errors.verification_code)
+                }
+                helperText={
+                  formik.touched.verification_code &&
+                  formik.errors.verification_code
+                }
                 margin="normal"
               />
             </Grid>
@@ -262,7 +342,6 @@ const Signup = ({ handleSelect }) => {
               </Link>
             </Grid>
           </Grid>
-          {console.log(formik.errors.username)}
         </form>
       </Box>
     </Container>
